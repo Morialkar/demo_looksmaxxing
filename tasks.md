@@ -90,10 +90,10 @@ command and show its output before marking a task done.
 
 ## Task 8 — `format` implementation
 
-- **Objective**: `DraftPlan` (or the fallback plan) → `FinalPlan` (markdown + non-empty `disclaimers[]`). Each section's `references[]` is rendered as a "Pour aller plus loin" markdown link list directly under that section.
+- **Objective**: `DraftPlan` (or the fallback plan) → `FinalPlan` (markdown + non-empty `disclaimers[]`). Each section's `references[]` is rendered as a "Pour aller plus loin" markdown link list directly under that section. Also handles the branch tasks.md missed until now: when `state.route === "resources"` there is no `draftPlan` at all (runPipeline short-circuits retrieve/compose/critique) — `format` must render a resources-oriented `FinalPlan` in that case instead of throwing.
 - **Files**: `src/pipeline/steps/format.ts`, `test/pipeline/format.test.ts`.
-- **Acceptance criteria**: `disclaimers.length > 0` in every case, including the fallback path; a section with `references: []` renders with no link list (not an empty heading); ASSUMPTION — the fallback plan (Task 7) ships with `references: []` throughout, ships no article links.
-- **Tests**: nominal (references rendered as markdown links), edge (fallback plan formats correctly with no reference links; section with empty references omits the block), error n/a.
+- **Acceptance criteria**: `disclaimers.length > 0` in every case, including the fallback path and the resources path; a section with `references: []` renders with no link list (not an empty heading); ASSUMPTION — the fallback plan (Task 7) ships with `references: []` throughout, ships no article links.
+- **Tests**: nominal (references rendered as markdown links), edge (fallback plan formats correctly with no reference links; section with empty references omits the block; `route === "resources"` renders the resources markdown, not a normal plan), error (`route !== "resources"` and `draftPlan` missing → explicit thrown error, not a crash).
 - **Dependencies**: Task 1, 3.
 - **Verification**: `npx vitest run test/pipeline/format.test.ts`
 
