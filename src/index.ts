@@ -1,3 +1,8 @@
-// ASSUMPTION: placeholder entry point for Task 0 scaffolding. Replaced by the
-// Fastify bootstrap in Task 10.
-export {};
+import { buildServer } from "./server.js";
+
+const app = buildServer();
+
+app.listen({ port: 3000, host: "0.0.0.0" }).catch((err: unknown) => {
+  app.log.error(err);
+  process.exit(1);
+});
