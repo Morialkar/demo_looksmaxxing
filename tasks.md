@@ -50,14 +50,15 @@ command and show its output before marking a task done.
 - **Dependencies**: Task 1.
 - **Verification**: `npx vitest run test/pipeline/runPipeline.test.ts`
 
-## Task 4 — `safetyGate` implementation
+## Task 4 — `intake` + `safetyGate` implementation
 
-- **Objective**: age < 18 → route `resources`; extreme-language flag → route `resources`; else → route `normal`.
-- **Files**: `src/pipeline/steps/safetyGate.ts`, `test/pipeline/safetyGate.test.ts`.
-- **Acceptance criteria**: matches `plan.md` safety rules exactly; no LLM call in this step (pure rule check on `UserProfile.flags`/`age`).
-- **Tests**: nominal (adult, clean profile → normal), edge (age exactly 18 → normal, age 17 → resources), error (n/a — malformed profile already rejected upstream by Task 1's schema).
+- **Objective**: `intake` — `state.raw` parsed against `userProfileSchema` into `state.profile`, throws `IntakeValidationError` on failure (this was plan.md's pipeline step 1, missing its own task in this breakdown — folded in here since `safetyGate` cannot run without it). `safetyGate` — age < 18 → route `resources`; extreme-language flag → route `resources`; else → route `normal`.
+- **Files**: `src/pipeline/steps/intake.ts`, `src/pipeline/steps/safetyGate.ts`, `test/pipeline/intake.test.ts`, `test/pipeline/safetyGate.test.ts`.
+- **Acceptance criteria**: matches `plan.md` safety rules exactly; no LLM call in either step (pure Zod parse, then pure rule check on `UserProfile.flags`/`age`); `unrealisticGoals` is intentionally not read by `safetyGate` — it feeds `critique` (Task 7) instead, per plan.md's adversarial-case list.
+- **Tests** (safetyGate): nominal (adult, clean profile → normal), edge (age exactly 18 → normal, age 17 → resources), error (n/a — malformed profile already rejected upstream by `intake`).
+- **Tests** (intake): nominal (valid raw payload → profile set), edge (raw payload with extra unknown fields still parses), error (malformed raw payload → `IntakeValidationError` thrown, not swallowed).
 - **Dependencies**: Task 1, 3.
-- **Verification**: `npx vitest run test/pipeline/safetyGate.test.ts`
+- **Verification**: `npx vitest run test/pipeline/intake.test.ts test/pipeline/safetyGate.test.ts`
 
 ## Task 5 — `retrieve` implementation (stub corpus)
 
